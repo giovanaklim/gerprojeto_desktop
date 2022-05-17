@@ -25,7 +25,7 @@
             <div class="row">
               <q-input
                 v-model="form.password"
-                type="text"
+                type="password"
                 label="Senha"
                 :error="error.password"
                 :error-message="error.passwordMessage"
@@ -70,13 +70,13 @@ export default {
   },
   methods: {
     getCookie () {
+      this.loading = true
       sanctum.get('sanctum/csrf-cookie').then(response => {
           this.loginUser()
         }
       )
     },
     loginUser () {
-      this.loading = true
       const url = 'login'
 
       api({
@@ -87,7 +87,8 @@ export default {
           .then(response => {
             this.loading = false
             this.store.$state.user = response.data
-            this.store.$state.isLogged = false
+            this.store.$state.isLogged = true
+            localStorage.isLogged = true
             this.$router.push('/')
 
           })

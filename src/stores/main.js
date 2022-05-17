@@ -8,7 +8,7 @@ export const mainStore = defineStore('main', {
 
   getters: {
     user (state) {
-      return state.main.user
+      return state.$state.user
     }
   },
 
