@@ -2,7 +2,7 @@
   <div class="Login" style="height: 100vh">
     <div class="login-form row justify-center items-center full-height full-width">
       <div class="row full-width justify-center">
-        <span class="text-h3 dosis-500">GERENCIADOR DE PROJETOS</span>
+        <span class="text-h3 poppins-regular">GERENCIADOR DE PROJETOS</span>
       </div>
       <div class="row">
         <q-card class="my-card" style="width: 400px">
