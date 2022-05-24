@@ -1,7 +1,7 @@
 <template>
   <div class="Menu full-height column justify-between no-wrap">
     <q-list class="dosis-500">
-      <q-item clickable v-ripple class="q-mt-md">
+      <q-item clickable v-ripple class="q-mt-md" to="nova-obra">
         <q-item-section avatar>
           <q-icon color="primary" size="sm" name="architecture" />
         </q-item-section>
@@ -43,7 +43,9 @@
 export default {
   name: 'Menu',
   data () {
-    return {}
+    return {
+
+    }
   }
 }
 </script>

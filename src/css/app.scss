@@ -44,6 +44,87 @@ html {
     url("../assets/fonts/Dosis-ExtraBold.ttf") format("truetype");
 }
 
+@font-face {
+  font-family: poppins;
+  src: local("poppins"),
+    url("../assets/fonts/Poppins-ExtraLight.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: poppins-bold;
+  src: local("poppins-bold"),
+    url("../assets/fonts/Poppins-Bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: poppins-thin;
+  src: local("poppins-thin"),
+    url("../assets/fonts/Poppins-Thin.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: poppins-extra-light;
+  src: local("poppins-extra-light"),
+    url("../assets/fonts/Poppins-ExtraLight.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: poppins-light;
+  src: local("poppins-light"),
+    url("../assets/fonts/Poppins-Light.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: poppins-regular;
+  src: local("poppins-regular"),
+    url("../assets/fonts/Poppins-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: poppins-semibold;
+  src: local("poppins-semibold"),
+    url("../assets/fonts/Poppins-SemiBold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: poppins-medium;
+  src: local("poppins-medium"),
+    url("../assets/fonts/Poppins-Medium.ttf") format("truetype");
+}
+
+.poppins-medium {
+  font-family: "poppins-medium";
+}
+
+.poppins-thin {
+  font-family: "poppins-thin";
+}
+
+.poppins-extra-light {
+  font-family: "poppins-extra-light";
+}
+
+.poppins-light {
+  font-family: "poppins-light";
+}
+
+.poppins-regular {
+  font-family: "poppins-regular";
+}
+
+.poppins-semibold {
+  font-family: "poppins-semibold";
+}
+
+.poppins {
+  font-family: "poppins";
+}
+
+.poppins-bold {
+  font-family: "poppins-bold";
+}
+
+
 .dosis-200 {
   font-family: "dosis-200";
 }
@@ -70,4 +151,8 @@ html {
 
 .dosis-800 {
   font-family: "dosis-800";
+}
+
+.grey-color {
+  color: #1F7070;
 }

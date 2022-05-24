@@ -4,7 +4,7 @@
       <q-toolbar>
         <q-icon color="white" size="md" name="engineering" />
 
-        <q-toolbar-title class="dosis-600">
+        <q-toolbar-title class="poppins-regular">
           Gerenciador de Projetos
         </q-toolbar-title>
 
@@ -32,8 +32,12 @@
       v-model="leftDrawerOpen"
       show-if-above
       elevated
+      :mini="miniState"
       :width="250"
       :breakpoint="300"
+      @mouseover="miniState = false"
+      @mouseout="miniState = true"
+      mini-to-overlay
     >
       <Menu class="q-mt-500" />
     </q-drawer>
@@ -53,7 +57,8 @@ export default {
     data() {
         return {
             leftDrawerOpen: true,
-            store: mainStore()
+            store: mainStore(),
+            miniState: false
         };
     },
     mounted () {
