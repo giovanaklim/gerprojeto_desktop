@@ -13,37 +13,51 @@
         icon="settings"
         :done="done1"
       >
-        <div class="row q-mb-lg">
-          <q-input v-model="form.name" type="text" label="Obra" style="width: 100%"/>
+      <div class="row">
+        <div class="col q-mr-md">
+          <div class="row q-mb-lg">
+            <q-input v-model="project.name" type="text" label="Obra" style="width: 100%"/>
+          </div>
+          <div class="row q-mb-lg">
+            <q-input v-model="project.company" type="text" label="Empresa" style="width: 100%" />
+          </div>
+          <div class="row q-mb-lg">
+            <q-input v-model="project.head" type="text" label="Responsável" style="width: 100%" />
+          </div>
+          <div class="row q-mb-xl">
+            <q-input
+              v-model="project.value"
+              type="text"
+              label="Valor"
+              prefix="R$ "
+              mask="##.##"
+              fill-mask="00.00"
+              reverse-fill-mask
+              style="width: 100%"
+            />
+          </div>
+          <q-stepper-navigation>
+            <q-btn @click="submitProject" :loading="loading" color="primary" label="Continuar" />
+          </q-stepper-navigation>
         </div>
-        <div class="row q-mb-lg">
-          <q-input v-model="form.company" type="text" label="Empresa" style="width: 100%" />
+        <div class="col q-mx-sm">
+          <q-date v-model="project.dates" mask="DD/MM/YYYY" title="Período do Projeto" range>
+            <div class="row items-center justify-end">
+              <q-btn v-close-popup label="Selecionar" color="primary" flat />
+            </div>
+          </q-date>
         </div>
-        <div class="row q-mb-lg">
-          <q-input v-model="form.head" type="text" label="Responsável" style="width: 100%" />
+        <div class="col q-ml-md">
+          <div class="row justify-center">
+            <img
+              src="~/assets/img/crane.svg"
+              class="flip-horizontal q-mt-lg"
+              style="height: 300px;"
+            />
+          </div>
         </div>
-        <div class="row justify-between q-mb-lg">
-          <q-input v-model="form.start" mask="date" :rules="['date']" label="Previsão de Início" style="width: 45%">
-            <template v-slot:append>
-              <q-icon name="event" class="cursor-pointer">
-                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                  <q-date v-model="form.start">
-                    <div class="row items-center justify-end">
-                      <q-btn v-close-popup label="Selecionar" color="primary" flat />
-                    </div>
-                  </q-date>
-                </q-popup-proxy>
-              </q-icon>
-            </template>
-          </q-input>
+      </div>
 
-          <q-input v-model="form.start" placeholder="DD/MM/AAAA" type="text" mask="##/##/####" label="Previsão de Início" style="width: 45%" />
-          <q-input v-model="form.end" placeholder="DD/MM/AAAA" type="text" mask="##/##/####" label="Previsão de Conclusão" style="width: 45%" />
-        </div>
-
-        <q-stepper-navigation>
-          <q-btn @click="() => { done1 = true; step = 2 }" color="primary" label="Continue" />
-        </q-stepper-navigation>
       </q-step>
 
       <q-step
@@ -77,86 +91,24 @@
         </q-stepper-navigation>
       </q-step>
     </q-stepper>
-    <!-- <div class="row">
-      <span class="text-h4 poppins-regular">Nova Obra</span>
-    </div>
-    <div class="container row q-ma-lg">
-      <div class="col-4">
-        <div class="row q-mb-lg">
-          <q-input v-model="form.name" type="text" label="Obra" style="width: 100%"/>
-        </div>
-        <div class="row q-mb-lg">
-          <q-input v-model="form.company" type="text" label="Empresa" style="width: 100%" />
-        </div>
-        <div class="row q-mb-lg">
-          <q-input v-model="form.head" type="text" label="Responsável" style="width: 100%" />
-        </div>
-        <div class="row justify-between q-mb-lg">
-          <q-input v-model="form.start" placeholder="DD/MM/AAAA" type="text" mask="##/##/####" label="Previsão de Início" style="width: 45%" />
-          <q-input v-model="form.end" placeholder="DD/MM/AAAA" type="text" mask="##/##/####" label="Previsão de Conclusão" style="width: 45%" />
-        </div>
-        <div class="row q-mt-xl q-pt-xl">
-          <q-btn color="primary" icon="check" label="Criar Nova Obra" @click="onClick" />
-        </div>
-      </div>
-      <div class="col q-ml-xl">
-        <q-card flat style="background-color: #f5f5f5">
-          <q-card-section>
-            <div class="text-h6 grey-color poppins-medium">Etapas</div>
-            <div class="text-grey dosis-500" style="font-size: 13px">Cadastre as etapas do Projeto</div>
-          </q-card-section>
-          <div class="row">
-            <div class="col q-mx-md">
-              <div class="row">
-                <q-input v-model="stageName" type="text" label="Etapa" style="width: 100%" />
-              </div>
-              <div class="row">
-                  <q-input v-model="stageHead" type="text" label="Responsável" style="width: 100%" />
-              </div>
-              <div class="row">
-                <q-input v-model="stageDetail" type="textarea" maxlength="150" rows="3" label="Descrição" style="width: 100%" />
-              </div>
-              <div class="row justify-between q-mb-lg">
-                <q-input v-model="stageStart" placeholder="DD/MM/AAAA" type="text" mask="##/##/####" label="Previsão de Início" style="width: 45%" />
-                <q-input v-model="stageEnd" placeholder="DD/MM/AAAA" type="text" mask="##/##/####" label="Previsão de Conclusão" style="width: 45%" />
-              </div>
-              <div class="row q-mt-lg">
-                <q-btn color="grey" icon="map" label="Adicionar Etapa" @click="addStage" />
-              </div>
-            </div>
-            <q-separator inset vertical />
-            <div class="col q-mx-md">
-              <q-list>
-                <template v-for="item,index in stage" :key="index">
-                  <q-item>
-                    <q-item-section>{{(index + 1) + '. ' + item.name + ' - ' + item.head}}</q-item-section>
-                    <q-item-section class="row text-right">
-                      <q-icon class="cursor-pointer" size="xs" color="negative" name="delete" @click="removeStage()" />
-                    </q-item-section>
-                  </q-item>
-                  <q-separator />
-                </template>
-              </q-list>
-            </div>
-          </div>
-          <q-card-section class="dosis-500">
-          </q-card-section>
-        </q-card>
-      </div>
-    </div> -->
   </div>
 </template>
 
 <script>
+import { api } from 'src/boot/axios'
+
 export default {
   name: 'NewProject',
   data () {
     return {
-      form: {},
+      project: {
+        status: 'draft',
+      },
       stage: [],
       stageName: null,
       stageHead: null,
-      step: 1
+      step: 1,
+      loading: false
     }
   },
   methods: {
@@ -167,11 +119,54 @@ export default {
       })
 
       this.clearStageForm()
+    },
+    clearStageForm () {
+      this.stageName = null
+      this.stageHead = null
+    },
+    submitProject () {
+      this.loading = true
+      api({
+            method: 'post',
+            url: 'project',
+            data: this.project
+          })
+            .then(response => {
+              this.loading = false
+              this.project = response.data.data
+              this.project.dates = {
+                from: response.data.data.start,
+                to: response.data.data.end
+              }
+              this.done1 = true
+              this.step = 2
+              this.$forceUpdate()
+              console.log(this.project)
+            })
+            .catch(error => {
+              this.loading = false
+              console.log(error.response)
+
+            // if (error.response.data.errors.email) {
+            //   this.error.email = true;
+            //   this.error.emailMessage = error.response.data.errors.email[0]
+            //   return
+            // }
+
+            // if (error.response.data.errors.password) {
+            //   this.error.password = true;
+            //   this.error.passwordMessage = error.response.data.errors.password[0]
+            //   return
+            // }
+
+            // if (error.response.data.errors.auth) {
+            //   this.error.auth = true;
+            //   this.error.authMessage = error.response.data.errors.auth[0]
+            //   return
+            // }
+          })
+
     }
-  },
-  clearStageForm () {
-    this.stageName = null
-    this.stageHead = null
   }
 }
 </script>
