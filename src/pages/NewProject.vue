@@ -1,5 +1,8 @@
 <template>
   <div class="NewProject q-pa-md q-ml-md">
+    <div class="row q-mx-md text-h4 dosis-600 text-primary">
+      Novo Projeto
+    </div>
     <q-stepper
       v-model="step"
       header-nav
@@ -37,13 +40,13 @@
             />
           </div>
           <q-stepper-navigation>
-            <q-btn @click="submitProject" :loading="loading" color="primary" label="Continuar" />
+            <q-btn @click="onClick" class="q-mx-sm text-primary" :loading="loading" style="background-color:#CFF2F2" label="Salvar" />
+            <q-btn @click="step = 2" class="q-mx-sm" :loading="loading" color="primary" label="Prosseguir" />
           </q-stepper-navigation>
         </div>
         <div class="col q-mx-sm">
           <q-date v-model="project.dates" mask="DD/MM/YYYY" title="Período do Projeto" range>
             <div class="row items-center justify-end">
-              <q-btn v-close-popup label="Selecionar" color="primary" flat />
             </div>
           </q-date>
         </div>
@@ -62,32 +65,31 @@
 
       <q-step
         :name="2"
-        title="Create an ad group"
-        caption="Optional"
+        title="Etapas"
         icon="create_new_folder"
         :done="done2"
       >
-        An ad group contains one or more ads which target a shared set of keywords.
-
-        <q-stepper-navigation>
-          <q-btn @click="() => { done2 = true; step = 3 }" color="primary" label="Continue" />
-          <q-btn flat @click="step = 1" color="primary" label="Back" class="q-ml-sm" />
+        <Stage></Stage>
+        <q-stepper-navigation >
+        <div class="row" style="width:100%">
+          <q-btn @click="onClick" class="q-mx-sm text-primary" :loading="loading" style="background-color:#CFF2F2" label="Salvar" />
+          <q-btn @click="() => { done2 = true; step = 3 }" color="primary" label="Prosseguir" />
+          <q-space />
+          <q-btn flat @click="step = 1" color="primary" label="Voltar" class="q-ml-sm" />
+        </div>
         </q-stepper-navigation>
       </q-step>
 
       <q-step
         :name="3"
-        title="Create an ad"
+        title="Revisão e Envio"
         icon="add_comment"
         :done="done3"
       >
-        Try out different ad text to see what brings in the most customers, and learn how to
-        enhance your ads using features like ad extensions. If you run into any problems with
-        your ads, find out how to tell if they're running and how to resolve approval issues.
-
+       <Review></Review>
         <q-stepper-navigation>
-          <q-btn color="primary" @click="done3 = true" label="Finish" />
-          <q-btn flat @click="step = 2" color="primary" label="Back" class="q-ml-sm" />
+          <q-btn color="primary" @click="done3 = true" label="Criar Projeto" />
+          <q-btn flat @click="step = 2" color="primary" label="Voltar" class="q-ml-sm" />
         </q-stepper-navigation>
       </q-step>
     </q-stepper>
@@ -96,78 +98,77 @@
 
 <script>
 import { api } from 'src/boot/axios'
+import Stage from 'src/components/Stage.vue';
+import Review from 'src/components/Review.vue';
 
 export default {
-  name: 'NewProject',
-  data () {
-    return {
-      project: {
-        status: 'draft',
-      },
-      stage: [],
-      stageName: null,
-      stageHead: null,
-      step: 1,
-      loading: false
-    }
-  },
-  methods: {
-    addStage () {
-      this.stage.push ({
-        name: this.stageName,
-        head: this.stageHead
-      })
-
-      this.clearStageForm()
+    name: "NewProject",
+    data() {
+        return {
+          onClick: false,
+            project: {
+                status: "draft",
+            },
+            stage: [],
+            stageName: null,
+            stageHead: null,
+            step: 1,
+            loading: false
+        };
     },
-    clearStageForm () {
-      this.stageName = null
-      this.stageHead = null
-    },
-    submitProject () {
-      this.loading = true
-      api({
-            method: 'post',
-            url: 'project',
-            data: this.project
-          })
-            .then(response => {
-              this.loading = false
-              this.project = response.data.data
-              this.project.dates = {
-                from: response.data.data.start,
-                to: response.data.data.end
-              }
-              this.done1 = true
-              this.step = 2
-              this.$forceUpdate()
-              console.log(this.project)
+    methods: {
+        addStage() {
+            this.stage.push({
+                name: this.stageName,
+                head: this.stageHead
+            });
+            this.clearStageForm();
+        },
+        clearStageForm() {
+            this.stageName = null;
+            this.stageHead = null;
+        },
+        submitProject() {
+            this.loading = true;
+            api({
+                method: "post",
+                url: "project",
+                data: this.project
             })
-            .catch(error => {
-              this.loading = false
-              console.log(error.response)
-
-            // if (error.response.data.errors.email) {
-            //   this.error.email = true;
-            //   this.error.emailMessage = error.response.data.errors.email[0]
-            //   return
-            // }
-
-            // if (error.response.data.errors.password) {
-            //   this.error.password = true;
-            //   this.error.passwordMessage = error.response.data.errors.password[0]
-            //   return
-            // }
-
-            // if (error.response.data.errors.auth) {
-            //   this.error.auth = true;
-            //   this.error.authMessage = error.response.data.errors.auth[0]
-            //   return
-            // }
-          })
-
-    }
-  }
+                .then(response => {
+                this.loading = false;
+                this.project = response.data.data;
+                this.project.dates = {
+                    from: response.data.data.start,
+                    to: response.data.data.end
+                };
+                this.done1 = true;
+                this.step = 2;
+                this.$forceUpdate();
+                console.log(this.project);
+            })
+                .catch(error => {
+                this.loading = false;
+                console.log(error.response);
+                // if (error.response.data.errors.email) {
+                //   this.error.email = true;
+                //   this.error.emailMessage = error.response.data.errors.email[0]
+                //   return
+                // }
+                // if (error.response.data.errors.password) {
+                //   this.error.password = true;
+                //   this.error.passwordMessage = error.response.data.errors.password[0]
+                //   return
+                // }
+                // if (error.response.data.errors.auth) {
+                //   this.error.auth = true;
+                //   this.error.authMessage = error.response.data.errors.auth[0]
+                //   return
+                // }
+            });
+        }
+    },
+    components: { Stage, Review }
 }
 </script>
 

@@ -7,19 +7,19 @@
         </q-item-section>
         <q-item-section>Novo Projeto</q-item-section>
       </q-item>
-      <q-item clickable v-ripple>
+      <q-item clickable v-ripple to="projetos-em-andamento">
         <q-item-section avatar>
-          <q-icon color="primary" size="sm" name="foundation" />
+          <q-icon color="primary" size="sm" name="foundation"  />
         </q-item-section>
         <q-item-section>Projetos em Andamento</q-item-section>
       </q-item>
-      <q-item clickable v-ripple>
+      <q-item clickable v-ripple  to="projetos-concluidos">
         <q-item-section avatar>
           <q-icon color="primary" size="sm" name="home_work" />
         </q-item-section>
         <q-item-section>Projetos Concluídos</q-item-section>
       </q-item>
-      <q-item clickable v-ripple>
+      <q-item clickable v-ripple to="equipe">
         <q-item-section avatar>
           <q-icon color="primary" size="sm" name="group" />
         </q-item-section>
@@ -29,7 +29,7 @@
 
     <q-item class="col-grow" />
     <q-separator />
-    <q-item clickable v-ripple class="dosis-500 q-py-md" style="background-color: #ebebeb">
+    <q-item clickable to="minha-conta" v-ripple class="dosis-500 q-py-md" style="background-color: #ebebeb">
       <q-item-section avatar>
         <q-icon color="primary" size="sm" name="settings" />
       </q-item-section>
