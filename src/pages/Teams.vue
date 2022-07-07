@@ -10,17 +10,18 @@
           Cadastrar novo membro
         </div>
           <div class="row q-ma-md" >
-            <q-input v-model="project.name" type="text" label="Nome" style="width: 100%"/>
+            <q-input v-model="team.name" type="text" label="Nome" style="width: 100%"/>
           </div>
           <div class="row q-ma-md">
-            <q-input v-model="project.role" type="text" label="Função" style="width: 100%" />
+            <q-input v-model="team.role" type="text" label="Função" style="width: 100%" />
           </div>
-          <q-btn color="primary" class="q-ma-md" icon="add" label="Adicionar" @click="onClick" />
+          <q-btn color="primary" class="q-ma-md" icon="add" label="Adicionar" @click="submitTeamMate()" />
         </q-card>
       </div>
       <div class="col q-mx-md">
         <q-table
         class="q-px-md"
+        :filter="filter"
         :rows="rows"
         :columns="columns"
         style="width:100%"
@@ -31,24 +32,39 @@
             Equipe existente
           </div>
           <q-space />
-          <q-input borderless dense debounce="300" color="primary" v-model="filter">
+          <q-input dense debounce="300" color="primary" v-model="filter">
             <template v-slot:append>
               <q-icon name="search" />
             </template>
           </q-input>
           </template>
-          <template v-slot:roleer="props">
-            <q-tr :props="props">
-              <q-th auto-width />
-              <q-th
-                v-for="col in props.cols"
-                :key="col.name"
-                :props="props"
-              >
-                {{ col.label }}
-              </q-th>
-            </q-tr>
-          </template>
+
+           <template v-slot:body="props">
+        <q-tr :props="props">
+          <q-td key="name" :props="props">
+            <div v-if="props.expand === false">
+              {{ props.row.name }}
+            </div>
+            <div v-else>
+              <q-input v-model="update.name" @blur="updateTeamMate(props)" type="text"/>
+            </div>
+          </q-td>
+          <q-td key="role" :props="props">
+            <div v-if="props.expand  === false">
+              {{ props.row.role }}
+            </div>
+            <div v-else>
+              <q-input v-model="update.role"  @blur="updateTeamMate(props)" type="text"/>
+            </div>
+          </q-td>
+          <q-td key="action" :props="props">
+              <div>
+                <q-btn class="q-mx-xs" color="primary" icon="edit" @click="editTeamMate(props)" size="sm" round/>
+                <q-btn class="q-mx-xs" color="primary" icon="delete" @click="deleteTeamMate(props)" size="sm" round />
+              </div>
+            </q-td>
+        </q-tr>
+      </template>
         </q-table>
      </div>
     </div>
@@ -56,6 +72,7 @@
 </template>
 
 <script>
+import { api } from 'src/boot/axios'
 const columns = [
   {
     name: 'name',
@@ -68,47 +85,106 @@ const columns = [
   },
   { name: 'role', label: 'Função',  field: row => row.role,
     format: val => `${val}`, sortable: true },
+  { name: 'action', label: '' },
 ]
 
-const rows = [
-  {
-    name: 'Frozen Yogurt',
-    role: 159,
-  },
-  {
-    name: 'Ice cream sandwich',
-    role: 237,
-  },
-  {
-    name: 'Eclair',
-    role: 262,
-  },
-  {
-    name: 'Cupcake',
-    role: 305,
-  },
-  {
-    name: 'Gingerbread',
-    role: 356,
-  },
-]
+
 export default {
   data () {
     return {
-      project: {
-        email:'',
-        role: '',
-        password: '',
-        name: '',
+      update: {},
+      editRow:[],
+      team: {
+        name:'',
+        role:'',
       },
       columns,
-      rows,
+      rows: [],
+      filter: null,
       form: {
         color1: '#9C27B0',
         color2: '#21BA45',
         color3: '#F2C037',
       }
 
+    }
+  },
+  mounted () {
+    this.loadTeam()
+  },
+  methods: {
+    loadTeam () {
+      api({
+        method: "get",
+        url: "team",
+      })
+        .then(response => {
+        this.rows = response.data;
+        this.$forceUpdate();
+      })
+        .catch(error => {
+        this.loading = false;
+        console.log(error.response)
+      });
+    },
+    submitTeamMate() {
+      this.loading = true;
+        console.log(this.team);
+      api({
+        method: "post",
+        url: "team",
+        data: this.team
+      })
+        .then(response => {
+        this.loading = false;
+        this.rows = response.data;
+        this.$forceUpdate();
+        this.resetForm ();
+      })
+        .catch(error => {
+        this.loading = false;
+        console.log(error.response)
+      });
+    },
+    resetForm () {
+      this.team = {
+        name: '',
+        role: ''
+      }
+    },
+
+    editTeamMate (val) {
+      val.expand = true
+      this.update.id = val.row.id
+      this.update.name = val.row.name
+      this.update.role = val.row.role
+    },
+     updateTeamMate (val) {
+      val.expand = false
+      api({
+        method: "put",
+        url: "team/" + val.row.id,
+        data: this.update
+      })
+        .then(response => {
+        this.rows = response.data
+      })
+        .catch(error => {
+        console.log(error.response)
+      })
+    },
+    deleteTeamMate (val) {
+      val.expand = false
+      api({
+        method: "delete",
+        url: "team/" + val.row.id
+      })
+        .then(response => {
+        this.rows = response.data
+      })
+        .catch(error => {
+        console.log(error.response)
+      })
     }
   }
 }

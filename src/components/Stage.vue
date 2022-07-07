@@ -6,33 +6,37 @@
           v-model="form.name"
           label="Nome da Etapa"
           :rules="[ val => val && val.length > 0 || 'Campo Obrigatório!']"
+          @blur="$emit('new-stage', form)"
         />
+       <q-select
+        v-model="form.head"
+        map-options
+        emit-value
+        :options="options"
+        option-label="name"
+        option-value="id"
+        label="Responsavel"
+        @blur="$emit('new-stage', form)"
 
-        <q-input
-          v-model="form.head"
-          label="Responsável"
-          :rules="[
-            val => val !== null && val !== '' || 'Campo Obrigatório!',
-          ]"
+      />
+      <q-input v-model="form.detail" label="Detalhes" @blur="$emit('new-stage', form)" stack-label ></q-input>
+      <div class="q-pa-sm">
+        <q-badge :style="'background-color: '+ form.color" class="text-black">
+          {{ form.color }}
+        </q-badge>
+        <q-color
+          v-model="form.color"
+          no-header
+          no-footer
+          default-view="palette"
+          class="my-picker q-mt-sm"
+          style="width:100px; height:50px"
         />
-        <q-input v-model="form.detail" label="Detalhes" stack-label></q-input>
-        <div class="q-pa-sm">
-          <q-badge :style="'background-color: '+ form.color" class="text-black">
-            {{ form.color }}
-          </q-badge>
-
-          <q-color
-            v-model="form.color"
-            no-header
-            no-footer
-            default-view="palette"
-            class="my-picker q-mt-sm"
-            style="width:100px; height:50px"
-          />
-        </div>  
+      </div>
       </div>
       <div class="col-3 q-mx-md">
-         <q-date v-model="project.dates" mask="DD/MM/YYYY" title="Período do Projeto" range>
+         <q-date v-model="project.dates" mask="DD/MM/YYYY" @blur="$emit('new-stage', form)" title="Período do Projeto" range>
+
             <div class="row items-center justify-end">
             </div>
           </q-date>
@@ -70,43 +74,15 @@ const columns = [
     format: val => `${val}`, label: 'Fim'},
 ]
 
-const rows = [
-  {
-    name: 'Frozen Yogurt',
-    head: 159,
-    start: 6.0,
-    end: 24,
-  },
-  {
-    name: 'Ice cream sandwich',
-    head: 237,
-    start: 9.0,
-    end: 37,
-  },
-  {
-    name: 'Eclair',
-    head: 262,
-    start: 16.0,
-    end: 23,
-  },
-  {
-    name: 'Cupcake',
-    head: 305,
-    start: 3.7,
-    end: 67,
-  },
-  {
-    name: 'Gingerbread',
-    head: 356,
-    start: 16.0,
-    end: 49,
-  },
-]
 
 export default {
+  props:{
+    projectId: String
+  },
 	data () {
 		return {
-      rows,
+      options:'',
+      rows:[],
       columns,
       project: {
         status: "draft",
@@ -120,7 +96,41 @@ export default {
       },
 		}
 	},
+  mounted () {
+    console.log(this.projectId)
+    this.getHeader()
+    this.loadStages()
+  },
   methods: {
+    getHeader () {
+       api({
+          method:"get",
+          url: "team",
+      })
+          .then(response => {
+          this.options = response.data;
+          this.$forceUpdate();
+      })
+      .catch(error => {
+        console.log(error.response);
+      })
+    },
+
+    loadStages () {
+       api({
+        method: "get",
+        url: "project/get-stages/" + this.project,
+      })
+        .then(response => {
+        this.rows = response.data;
+        this.$forceUpdate();
+      })
+        .catch(error => {
+        this.loading = false;
+        console.log(error.response)
+      });
+    },
+
     submitProject() {
       this.loading = true;
       api({
@@ -138,7 +148,6 @@ export default {
           this.done1 = true;
           this.step = 2;
           this.$forceUpdate();
-          console.log(this.project);
       })
           .catch(error => {
           this.loading = false;
@@ -158,7 +167,12 @@ export default {
           //   this.error.authMessage = error.response.data.errors.auth[0]
           //   return
           // }
-      });
+      })
+    }
+  },
+  watch:{
+    project (val){
+      this.loadStages()
     }
   }
 }

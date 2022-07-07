@@ -43,7 +43,7 @@
               label="login"
               :loading="loading"
               style="width: 40%"
-              @click="getCookie"/>
+              @click="loginUser"/>
           </q-card-actions>
         </q-card>
       </div>
@@ -68,15 +68,24 @@ export default {
       store: mainStore()
     }
   },
+  mounted () {
+    this.getCookie()
+  },
   methods: {
     getCookie () {
-      this.loading = true
-      sanctum.get('sanctum/csrf-cookie').then(response => {
-          this.loginUser()
+      sanctum({
+        method: 'get',
+        url: 'sanctum/csrf-cookie',
+        headers:{
+          'Accept':'application/json'
+        }
+        }).then(response => {
+
         }
       )
     },
     loginUser () {
+      this.loading = true
       const url = 'login'
 
       api({

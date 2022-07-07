@@ -25,7 +25,16 @@
             <q-input v-model="project.company" type="text" label="Empresa" style="width: 100%" />
           </div>
           <div class="row q-mb-lg">
-            <q-input v-model="project.head" type="text" label="Responsável" style="width: 100%" />
+           <q-select
+           style="width:100%"
+            v-model="project.head"
+            map-options
+            emit-value
+            :options="options"
+            option-label="name"
+            option-value="id"
+            label="Responsavel"
+          />
           </div>
           <div class="row q-mb-xl">
             <q-input
@@ -40,7 +49,7 @@
             />
           </div>
           <q-stepper-navigation>
-            <q-btn @click="onClick" class="q-mx-sm text-primary" :loading="loading" style="background-color:#CFF2F2" label="Salvar" />
+            <q-btn @click="submitProject()" class="q-mx-sm text-primary" :loading="loading" style="background-color:#CFF2F2" label="Salvar" />
             <q-btn @click="step = 2" class="q-mx-sm" :loading="loading" color="primary" label="Prosseguir" />
           </q-stepper-navigation>
         </div>
@@ -69,10 +78,10 @@
         icon="create_new_folder"
         :done="done2"
       >
-        <Stage></Stage>
+        <Stage :project-id="id"  @new-stage="newStage"  ></Stage>
         <q-stepper-navigation >
         <div class="row" style="width:100%">
-          <q-btn @click="onClick" class="q-mx-sm text-primary" :loading="loading" style="background-color:#CFF2F2" label="Salvar" />
+          <q-btn @click="submitProject()" class="q-mx-sm text-primary" :loading="loading" style="background-color:#CFF2F2" label="Salvar" />
           <q-btn @click="() => { done2 = true; step = 3 }" color="primary" label="Prosseguir" />
           <q-space />
           <q-btn flat @click="step = 1" color="primary" label="Voltar" class="q-ml-sm" />
@@ -88,7 +97,7 @@
       >
        <Review></Review>
         <q-stepper-navigation>
-          <q-btn color="primary" @click="done3 = true" label="Criar Projeto" />
+          <q-btn color="primary" @click="submitProject()" label="Criar Projeto" />
           <q-btn flat @click="step = 2" color="primary" label="Voltar" class="q-ml-sm" />
         </q-stepper-navigation>
       </q-step>
@@ -105,18 +114,38 @@ export default {
     name: "NewProject",
     data() {
         return {
+          options: '',
           onClick: false,
-            project: {
-                status: "draft",
-            },
-            stage: [],
-            stageName: null,
-            stageHead: null,
-            step: 1,
-            loading: false
+          id: null,
+          project: {
+            status: "draft",
+          },
+          stage: [],
+          stageName: null,
+          stageHead: null,
+          step: 1,
+          loading: false
         };
     },
+    mounted () {
+      this.getHeader()
+    },
     methods: {
+
+      getHeader () {
+        api({
+          method:"get",
+          url: "team",
+        })
+          .then(response => {
+          this.options = response.data;
+          this.$forceUpdate();
+        })
+        .catch(error => {
+          console.log(error.response);
+        })
+      },
+
         addStage() {
             this.stage.push({
                 name: this.stageName,
@@ -129,44 +158,58 @@ export default {
             this.stageHead = null;
         },
         submitProject() {
-            this.loading = true;
+            this.done3 = true
             api({
                 method: "post",
                 url: "project",
                 data: this.project
             })
                 .then(response => {
-                this.loading = false;
-                this.project = response.data.data;
+                this.loading = false
+
+                this.project = response.data.data
                 this.project.dates = {
                     from: response.data.data.start,
                     to: response.data.data.end
                 };
                 this.done1 = true;
+                this.id = response.data.data.id
                 this.step = 2;
                 this.$forceUpdate();
-                console.log(this.project);
             })
                 .catch(error => {
                 this.loading = false;
                 console.log(error.response);
-                // if (error.response.data.errors.email) {
-                //   this.error.email = true;
-                //   this.error.emailMessage = error.response.data.errors.email[0]
-                //   return
-                // }
-                // if (error.response.data.errors.password) {
-                //   this.error.password = true;
-                //   this.error.passwordMessage = error.response.data.errors.password[0]
-                //   return
-                // }
-                // if (error.response.data.errors.auth) {
-                //   this.error.auth = true;
-                //   this.error.authMessage = error.response.data.errors.auth[0]
-                //   return
-                // }
-            });
-        }
+            })
+        },
+      // saveStage1 () {
+      //   api({
+      //     method: "post",
+      //     url: "project",
+      //     data: this.project
+      //   })
+      //   .then(response => {
+      //     this.loading = false
+      //     this.project = response.data.data
+      //     this.project.dates = {
+      //       from: response.data.data.start,
+      //       to: response.data.data.end
+      //     };
+      //     this.done1 = true;
+      //     this.step = 2;
+      //     this.$forceUpdate();
+      //     console.log(this.project);
+      //   })
+      //   .catch(error => {
+      //     this.loading = false;
+      //     console.log(error.response)
+      //   })
+      // }
+    },
+    watch:{
+      newStage (val) {
+        this.project.stage = val
+      }
     },
     components: { Stage, Review }
 }
