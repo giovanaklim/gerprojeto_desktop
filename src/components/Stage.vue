@@ -6,7 +6,6 @@
           v-model="form.name"
           label="Nome da Etapa"
           :rules="[ val => val && val.length > 0 || 'Campo Obrigatório!']"
-          @blur="$emit('new-stage', form)"
         />
        <q-select
         v-model="form.head"
@@ -16,10 +15,21 @@
         option-label="name"
         option-value="id"
         label="Responsavel"
-        @blur="$emit('new-stage', form)"
 
       />
-      <q-input v-model="form.detail" label="Detalhes" @blur="$emit('new-stage', form)" stack-label ></q-input>
+      <div class="row q-my-sm">
+        <q-input
+          v-model="form.value"
+          type="text"
+          label="Valor"
+          prefix="R$ "
+          mask="##.##"
+          fill-mask="00.00"
+          reverse-fill-mask
+          style="width: 100%"
+        />
+        </div>
+      <q-input v-model="form.detail" label="Detalhes"  stack-label ></q-input>
       <div class="q-pa-sm">
         <q-badge :style="'background-color: '+ form.color" class="text-black">
           {{ form.color }}
@@ -35,20 +45,23 @@
       </div>
       </div>
       <div class="col-3 q-mx-md">
-         <q-date v-model="project.dates" mask="DD/MM/YYYY" @blur="$emit('new-stage', form)" title="Período do Projeto" range>
-
-            <div class="row items-center justify-end">
-            </div>
-          </q-date>
+         <q-date v-model="form.dates" mask="DD/MM/YYYY" title="Período da Etapa" range />
       </div>
       <div class="col-4  q-mx-md ">
         <q-table
+         flat
           title="Etapas"
-          :rows="rows"
+          :rows="stagesList"
           :columns="columns"
           row-key="name"
         />
       </div>
+    </div>
+     <div class="row q-my-md" style="width:100%">
+      <q-btn @click="this.$emit('newstage', form) + this.reset()" class="q-mx-sm text-primary" :loading="loading" style="background-color:#CFF2F2" label="Salvar" />
+      <q-btn @click="this.$emit('step3')" color="primary" label="Prosseguir" />
+      <q-space />
+      <q-btn flat @click="this.$emit('step1')" color="primary" label="Voltar" class="q-ml-sm" />
     </div>
   </div>
 </template>
@@ -66,7 +79,7 @@ const columns = [
     format: val => `${val}`,
     sortable: true
   },
-  { name: 'head', align: 'center', label: 'Responsavel', field: row => row.head,
+  { name: 'head', align: 'center', label: 'Responsavel', field: row => row.head_user.name,
     format: val => `${val}`, sortable: true },
   { name: 'start', label: 'Inicio',  field: row => row.start,
     format: val => `${val}`, sortable: true },
@@ -77,17 +90,20 @@ const columns = [
 
 export default {
   props:{
-    projectId: String
+    projectId: String,
+    stagesList: Array
   },
 	data () {
 		return {
       options:'',
-      rows:[],
+      rows: this.stagesList,
       columns,
       project: {
         status: "draft",
       },
       form:{
+        value:null,
+        dates: null,
         name: '',
         project_id: null,
         head: '',
@@ -97,19 +113,23 @@ export default {
 		}
 	},
   mounted () {
-    console.log(this.projectId)
     this.getHeader()
     this.loadStages()
   },
   methods: {
     getHeader () {
-       api({
-          method:"get",
-          url: "team",
+      const url = 'team'
+      const params = {
+        Authorization: 'Bearer ' + localStorage.token
+      }
+      api({
+        method:"get",
+        url: url,
+        headers: params,
       })
-          .then(response => {
-          this.options = response.data;
-          this.$forceUpdate();
+        .then(response => {
+        this.options = response.data;
+        this.$forceUpdate();
       })
       .catch(error => {
         console.log(error.response);
@@ -117,9 +137,14 @@ export default {
     },
 
     loadStages () {
+       const url = 'stage/' + this.projectId
+       const params = {
+        Authorization: 'Bearer ' + localStorage.token
+      }
        api({
         method: "get",
-        url: "project/get-stages/" + this.project,
+        url: url,
+        headers: params,
       })
         .then(response => {
         this.rows = response.data;
@@ -131,49 +156,15 @@ export default {
       });
     },
 
-    submitProject() {
-      this.loading = true;
-      api({
-          method: "post",
-          url: "project",
-          data: this.project
-      })
-          .then(response => {
-          this.loading = false;
-          this.project = response.data.data;
-          this.project.dates = {
-              from: response.data.data.start,
-              to: response.data.data.end
-          };
-          this.done1 = true;
-          this.step = 2;
-          this.$forceUpdate();
-      })
-          .catch(error => {
-          this.loading = false;
-          console.log(error.response);
-          // if (error.response.data.errors.email) {
-          //   this.error.email = true;
-          //   this.error.emailMessage = error.response.data.errors.email[0]
-          //   return
-          // }
-          // if (error.response.data.errors.password) {
-          //   this.error.password = true;
-          //   this.error.passwordMessage = error.response.data.errors.password[0]
-          //   return
-          // }
-          // if (error.response.data.errors.auth) {
-          //   this.error.auth = true;
-          //   this.error.authMessage = error.response.data.errors.auth[0]
-          //   return
-          // }
-      })
+    reset () {
+      this.form.name = ''
+      this.form.head = ''
+      this.form.detail = ''
+      this.form.color = null
+      this.form.value = null
+      this.form.dates = null
     }
-  },
-  watch:{
-    project (val){
-      this.loadStages()
-    }
+
   }
 }
 </script>

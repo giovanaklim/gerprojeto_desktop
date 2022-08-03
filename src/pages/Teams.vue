@@ -114,9 +114,14 @@ export default {
   },
   methods: {
     loadTeam () {
+      const url = 'team'
+      const params = {
+        Authorization: 'Bearer ' + localStorage.token
+      }
       api({
         method: "get",
-        url: "team",
+        url: url,
+        headers: params
       })
         .then(response => {
         this.rows = response.data;
@@ -128,11 +133,14 @@ export default {
       });
     },
     submitTeamMate() {
-      this.loading = true;
-        console.log(this.team);
+      const url = 'team'
+      const params = {
+        Authorization: 'Bearer ' + localStorage.token
+      }
       api({
         method: "post",
-        url: "team",
+        url: url,
+        headers: params,
         data: this.team
       })
         .then(response => {

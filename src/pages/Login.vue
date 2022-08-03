@@ -69,59 +69,60 @@ export default {
     }
   },
   mounted () {
-    this.getCookie()
+    // this.getCookie()
   },
   methods: {
-    getCookie () {
-      sanctum({
-        method: 'get',
-        url: 'sanctum/csrf-cookie',
-        headers:{
-          'Accept':'application/json'
-        }
-        }).then(response => {
+    // getCookie () {
+    //   sanctum({
+    //     method: 'get',
+    //     url: 'sanctum/csrf-cookie',
+    //     headers:{
+    //       'Accept':'application/json'
+    //     }
+    //     }).then(response => {
 
-        }
-      )
-    },
+    //     }
+    //   )
+    // },
     loginUser () {
       this.loading = true
       const url = 'login'
 
       api({
-          method: 'post',
-          url: url,
-          data: this.form
-        })
-          .then(response => {
-            this.loading = false
-            this.store.$state.user = response.data
-            this.store.$state.isLogged = true
-            localStorage.isLogged = true
-            this.$router.push('/')
+        method: 'post',
+        url: url,
+        data: this.form
+      })
+      .then(response => {
+        this.loading = false
+        this.store.$state.user = response.data
+        this.store.$state.isLogged = true
+        localStorage.token = response.data.token
+        localStorage.isLogged = true
+        this.$router.push('/')
 
-          })
-          .catch(error => {
-            this.loading = false
+      })
+      .catch(error => {
+        this.loading = false
+        console.log(error)
+        if (error.response.data.errors.email) {
+          this.error.email = true;
+          this.error.emailMessage = error.response.data.errors.email[0]
+          return
+        }
 
-            if (error.response.data.errors.email) {
-              this.error.email = true;
-              this.error.emailMessage = error.response.data.errors.email[0]
-              return
-            }
+        if (error.response.data.errors.password) {
+          this.error.password = true;
+          this.error.passwordMessage = error.response.data.errors.password[0]
+          return
+        }
 
-            if (error.response.data.errors.password) {
-              this.error.password = true;
-              this.error.passwordMessage = error.response.data.errors.password[0]
-              return
-            }
-
-            if (error.response.data.errors.auth) {
-              this.error.auth = true;
-              this.error.authMessage = error.response.data.errors.auth[0]
-              return
-            }
-          })
+        if (error.response.data.errors.auth) {
+          this.error.auth = true;
+          this.error.authMessage = error.response.data.errors.auth[0]
+          return
+        }
+      })
     }
   }
 }

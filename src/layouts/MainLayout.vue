@@ -69,33 +69,38 @@ export default {
           this.leftDrawerOpen = !this.leftDrawerOpen;
       },
       isLogged () {
-        if (this.store.$state.isLogged) {
-          return
+        const url = 'is-logged'
+        const params = {
+          Authorization: 'Bearer ' + localStorage.token
         }
-
-        if (!localStorage.isLogged) {
-          this.$router.push('/login')
-          return
-        }
-
         api({
           method: 'get',
-          url: 'isLogged'
+          url: url,
+          headers: params
         })
           .then(response => {
-            this.store.$state.user = response.data
-            this.store.$state.isLogged = true
+            this.$nextTick(() => {
+              this.store.$state.user = response.data
+              this.store.$state.isLogged = true
+            })
           })
           .catch(error => {
             this.$router.push('/login')
           })
       },
       logout () {
+        const url = 'logout'
+        const params = {
+          Authorization: 'Bearer ' + localStorage.token
+        }
         api({
           method: 'get',
-          url: 'logout'
+          url: url,
+          headers: params
         })
           .then(response => {
+            this.store.$state.user = null
+            this.store.$state.isLogged = false
             this.$router.push('/login')
           })
           .catch(error => {

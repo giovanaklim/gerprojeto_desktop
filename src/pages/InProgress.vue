@@ -48,23 +48,13 @@
         </q-tr>
         <q-tr v-show="props.expand" :props="props">
           <q-td colspan="100%">
-            <div class="text-left">
-              <q-list >
-                <q-item clickable dense v-ripple class="q-ma-xs" style="border:1px solid; border-color: #34BABA; border-radius: 5px;">
-                 <q-badge :style="'background-color: '+ form.color1" class="text-black q-mt-xs" style="width:20px; height:20px">
-                </q-badge>
-                  <q-item-section class="q-ml-xs">Etapa 01</q-item-section>
-                </q-item>
-                <q-item clickable dense v-ripple class="q-ma-xs" style="border:1px solid; border-color: #34BABA; border-radius: 5px;">
-                  <q-badge :style="'background-color: '+ form.color2" class="text-black q-mt-xs" style="width:20px; height:20px">
-                 </q-badge>
-                  <q-item-section class="q-ml-xs">Etapa 02</q-item-section>
-                </q-item>
-                <q-item clickable dense v-ripple class="q-ma-xs" style="border:1px solid; border-color: #34BABA; border-radius: 5px;">
-                   <q-badge :style="'background-color: '+ form.color3" class="text-black q-mt-xs" style="width:20px; height:20px">
-                 </q-badge>
-                  <q-item-section class="q-ml-xs">Etapa 03</q-item-section>
-                </q-item>
+          <div class="text-left">
+            <q-list >
+              <q-item v-for="element in props.row.stages"  :key="element.id" dense v-ripple class="q-ma-xs" style="border:1px solid; border-color: #34BABA; border-radius: 5px;">
+                <q-badge :style="'background-color: '+ element.color" class="text-black q-mt-xs" style="width:20px; height:20px">
+              </q-badge>
+                <q-item-section class="q-ml-xs">{{element.name}}</q-item-section>
+              </q-item>
               </q-list>
             </div>
           </q-td>
@@ -76,6 +66,8 @@
 </template>
 
 <script>
+import { api } from 'src/boot/axios'
+
 const columns = [
   {
     name: 'name',
@@ -86,73 +78,57 @@ const columns = [
     format: val => `${val}`,
     sortable: true
   },
-  { name: 'company', align: 'center', label: 'Empresa', field: row => row.company,
+  { name: 'company', align: 'center', classes: 'text-center', label: 'Empresa', field: row => row.company,
     format: val => `${val}`, sortable: true },
-  { name: 'head', label: 'Responsável',  field: row => row.head,
+  { name: 'head', label: 'Responsável', classes: 'text-center',  align: 'center', field: row => row.head_name,
     format: val => `${val}`, sortable: true },
-  { name: 'value', field: row => row.value,
+  { name: 'value', align: 'center', classes: 'text-center',  field: row => row.value,
     format: val => `${val}`, label: 'Valor'},
-    { name: 'start', field: row => row.start,
+    { name: 'start', align: 'center', classes: 'text-center',   field: row => new Date(row.start).toLocaleDateString(),
   format: val => `${val}`, label: 'Inicio'},
-    { name: 'end', field: row => row.end,
+    { name: 'end',  align: 'center', classes: 'text-center',  field: row => new Date(row.end).toLocaleDateString(),
   format: val => `${val}`, label: 'Fim'},
-]
-
-const rows = [
-  {
-    name: 'Frozen Yogurt',
-    head: 159,
-    start: 6.0,
-    end: 24,
-    value: 14,
-    company: 'ShineShine'
-  },
-  {
-    name: 'Ice cream sandwich',
-    head: 237,
-    value: 14,
-    start: 9.0,
-    company: 'ShineShine',
-    end: 37,
-  },
-  {
-    name: 'Eclair',
-    head: 262,
-    value: 14,
-    start: 16.0,
-    company: 'ShineShine',
-    end: 23,
-  },
-  {
-    name: 'Cupcake',
-    head: 305,
-    value: 14,
-    company: 'ShineShine',
-    start: 3.7,
-    end: 67,
-  },
-  {
-    name: 'Gingerbread',
-    value: 14,
-    head: 356,
-    company: 'ShineShine',
-    start: 16.0,
-    end: 49,
-  },
 ]
 export default {
   data () {
     return {
       columns,
-      rows,
+      rows: [],
       form: {
         color1: '#9C27B0',
         color2: '#21BA45',
         color3: '#F2C037',
-      }
-
+      },
+      start: null,
+      end: null,
     }
-  }
+  },
+  mounted () {
+    this.getProject()
+  },
+  methods: {
+    getProject () {
+      const url = 'project'
+      const params = {
+      Authorization: 'Bearer ' + localStorage.token
+    }
+      api({
+        method:"get",
+        url: url,
+        headers: params,
+      })
+        .then(response => {
+          console.log(response.data)
+        this.rows = response.data.filter((element) => {
+          return element.status === 'in_progress' ? element : null
+        })
+        this.$forceUpdate()
+      })
+      .catch(error => {
+        console.log(error.response)
+      })
+    },
+  },
 }
 </script>
 

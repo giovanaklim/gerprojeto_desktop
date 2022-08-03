@@ -1,6 +1,6 @@
 <template>
-  <div class="NewProject q-pa-md q-ml-md">
-    <div class="row q-mx-md text-h4 dosis-600 text-primary">
+  <div class="NewProject q-pa-md q-ml-md dosis-500">
+    <div class="row q-mx-md q-mb-md q-mt-sm text-h4 dosis-600 text-primary">
       Novo Projeto
     </div>
     <q-stepper
@@ -78,15 +78,8 @@
         icon="create_new_folder"
         :done="done2"
       >
-        <Stage :project-id="id"  @new-stage="newStage"  ></Stage>
-        <q-stepper-navigation >
-        <div class="row" style="width:100%">
-          <q-btn @click="submitProject()" class="q-mx-sm text-primary" :loading="loading" style="background-color:#CFF2F2" label="Salvar" />
-          <q-btn @click="() => { done2 = true; step = 3 }" color="primary" label="Prosseguir" />
-          <q-space />
-          <q-btn flat @click="step = 1" color="primary" label="Voltar" class="q-ml-sm" />
-        </div>
-        </q-stepper-navigation>
+        <Stage  @newstage="newStage" @step1="step= 1"  @step3="() => { done2 = true; step = 3 }" :projectId="this.id"  :stagesList="stages"> </Stage>
+
       </q-step>
 
       <q-step
@@ -95,9 +88,9 @@
         icon="add_comment"
         :done="done3"
       >
-       <Review></Review>
+       <Review :project="this.project" :stagesList="stages"></Review>
         <q-stepper-navigation>
-          <q-btn color="primary" @click="submitProject()" label="Criar Projeto" />
+          <q-btn color="primary" @click="submitProjectInProgress()" label="Criar Projeto" />
           <q-btn flat @click="step = 2" color="primary" label="Voltar" class="q-ml-sm" />
         </q-stepper-navigation>
       </q-step>
@@ -118,13 +111,12 @@ export default {
           onClick: false,
           id: null,
           project: {
-            status: "draft",
-          },
+            status: null
+        },
           stage: [],
-          stageName: null,
-          stageHead: null,
           step: 1,
-          loading: false
+          loading: false,
+          stages: []
         };
     },
     mounted () {
@@ -133,9 +125,14 @@ export default {
     methods: {
 
       getHeader () {
+        const url = 'team'
+        const params = {
+        Authorization: 'Bearer ' + localStorage.token
+      }
         api({
           method:"get",
-          url: "team",
+          url: url,
+          headers: params,
         })
           .then(response => {
           this.options = response.data;
@@ -146,70 +143,88 @@ export default {
         })
       },
 
-        addStage() {
-            this.stage.push({
-                name: this.stageName,
-                head: this.stageHead
-            });
-            this.clearStageForm();
-        },
-        clearStageForm() {
-            this.stageName = null;
-            this.stageHead = null;
-        },
-        submitProject() {
-            this.done3 = true
-            api({
-                method: "post",
-                url: "project",
-                data: this.project
-            })
-                .then(response => {
-                this.loading = false
+      submitProject() {
+        const url = 'project'
+        const params = {
+        Authorization: 'Bearer ' + localStorage.token
+      }
+        this.project.status = 'draft'
+        api({
+        method: "post",
+        url: url,
+        headers: params,
+        data: this.project
+      })
+        .then(response => {
+        this.step = 2
+        this.loading = false
+        this.project = response.data.data
+        this.project.dates = {
+          from: response.data.data.start,
+          to: response.data.data.end
+        };
+        this.done1 = true
+        this.id = response.data.data.id
+      })
+        .catch(error => {
+        this.loading = false
+      })
+      },
 
-                this.project = response.data.data
-                this.project.dates = {
-                    from: response.data.data.start,
-                    to: response.data.data.end
-                };
-                this.done1 = true;
-                this.id = response.data.data.id
-                this.step = 2;
-                this.$forceUpdate();
-            })
-                .catch(error => {
-                this.loading = false;
-                console.log(error.response);
-            })
-        },
-      // saveStage1 () {
-      //   api({
-      //     method: "post",
-      //     url: "project",
-      //     data: this.project
-      //   })
-      //   .then(response => {
-      //     this.loading = false
-      //     this.project = response.data.data
-      //     this.project.dates = {
-      //       from: response.data.data.start,
-      //       to: response.data.data.end
-      //     };
-      //     this.done1 = true;
-      //     this.step = 2;
-      //     this.$forceUpdate();
-      //     console.log(this.project);
-      //   })
-      //   .catch(error => {
-      //     this.loading = false;
-      //     console.log(error.response)
-      //   })
-      // }
+      submitProjectInProgress() {
+        const url = 'project/' + this.project.id
+        const params = {
+        Authorization: 'Bearer ' + localStorage.token
+      }
+        this.project.status = "in_progress"
+        api({
+        method: "put",
+        url: url,
+        headers: params,
+        data: this.project
+      })
+        .then(response => {
+        this.step = 1
+        this.loading = false
+        this.project = response.data.data
+        this.project.dates = {
+          from: response.data.data.start,
+          to: response.data.data.end
+        };
+        this.done1 = true
+        this.id = response.data.data.id
+      })
+        .catch(error => {
+        this.loading = false
+      })
+      },
+
+      newStage (val) {
+        const url = 'stage'
+        const params = {
+          Authorization: 'Bearer ' + localStorage.token
+        }
+        val.project_id = this.project.id
+        api({
+          method: "post",
+          url: url,
+          headers: params,
+          data: val
+        })
+        .then(response => {
+          this.loading = false
+          this.stages = response.data.data
+          this.done2 = true
+          this.$forceUpdate();
+        })
+        .catch(error => {
+          this.loading = false;
+          console.log(error.response)
+        })
+      }
     },
     watch:{
-      newStage (val) {
-        this.project.stage = val
-      }
+
     },
     components: { Stage, Review }
 }

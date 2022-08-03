@@ -7,8 +7,8 @@ import axios from 'axios'
 // good idea to move this instance creation inside of the
 // "export default () => {}" function below (which runs individually
 // for each client)
-//  let url = 'http://localhost/gerprojeto_backend/public/'
- let url = 'http://127.0.0.1:8000/'
+ let url = 'http://localhost/gerprojeto_backend/public/'
+ //let url = 'http://127.0.0.1:8000/'
 //let url = 'https://gerprojeto-api.tecnoklim.com.br'
 
 const api = axios.create({ baseURL: url + 'api', withCredentials: true })

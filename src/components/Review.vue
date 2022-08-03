@@ -14,7 +14,7 @@
             	<q-input v-model="project.company" :readonly="true" type="text" label="Empresa" style="width: 100%" />
           	</div>
 						<div class="row q-mb-lg">
-							<q-input v-model="project.head" type="text" :readonly="true" label="Responsável" style="width: 100%" />
+							<q-input v-model="project.head_name" type="text" :readonly="true" label="Responsável" style="width: 100%" />
 						</div>
 						<div class="row q-mb-xl">
 							<q-input
@@ -33,7 +33,7 @@
 							<div class="col q-mr-md">
 								<q-input
 									:readonly="true"
-									v-model="project.start"
+									v-model="start"
 									type="text"
 									label="Inicio"
 									mask="##/##/####"
@@ -43,7 +43,7 @@
 							<div class="col">
 								<q-input
 									:readonly="true"
-									v-model="project.end"
+									v-model="end"
 									type="text"
 									label="Fim"
 									mask="##/##/####"
@@ -55,7 +55,7 @@
 					<div class="col-6 q-mx-md">
 						<q-table
 						title="Etapas"
-						:rows="rows"
+						:rows="stagesList"
 						:columns="columns"
 						row-key="name"
 					/>
@@ -67,7 +67,8 @@
 </template>
 
 <script>
-	const columns = [
+import { api } from 'src/boot/axios'
+const columns = [
   {
     name: 'stage',
     required: true,
@@ -77,62 +78,57 @@
     format: val => `${val}`,
     sortable: true
   },
-  { name: 'head', align: 'center', label: 'Responsavel', field: row => row.head,
+  { name: 'head', align: 'center', label: 'Responsavel', field: row => row.head_user.name,
     format: val => `${val}`, sortable: true },
-  { name: 'start', label: 'Inicio',  field: row => row.start,
+  { name: 'start', label: 'Inicio',  field: row => new Date(row.start).toLocaleDateString() ,
     format: val => `${val}`, sortable: true },
-  { name: 'end', field: row => row.end,
+  { name: 'end', field: row => new Date(row.end).toLocaleDateString(),
     format: val => `${val}`, label: 'Fim'},
 ]
-
-const rows = [
-  {
-    name: 'Frozen Yogurt',
-    head: 159,
-    start: 6.0,
-    end: 24,
-  },
-  {
-    name: 'Ice cream sandwich',
-    head: 237,
-    start: 9.0,
-    end: 37,
-  },
-  {
-    name: 'Eclair',
-    head: 262,
-    start: 16.0,
-    end: 23,
-  },
-  {
-    name: 'Cupcake',
-    head: 305,
-    start: 3.7,
-    end: 67,
-  },
-  {
-    name: 'Gingerbread',
-    head: 356,
-    start: 16.0,
-    end: 49,
-  },
-]
 export default {
-	
+
+  props: {
+    projectId: String,
+    project: Object,
+    stagesList: Array
+  },
+
 	data () {
 		return {
 			columns,
-			rows,
-			project: {
-					start:"21122004",
-					end:"24102016",
-					name: "Gi",
-					company:"ShineShine",
-					head:"Brihante",
-					status: "draft",
-			},
+      rows: this.stagesList,
+      headUser: null,
+      start: null,
+      end: null,
 		}
-	}
+	},
+  mounted () {
+    this.loadStages()
+    this.start = new Date (this.project.start).toLocaleDateString()
+    this.end = new Date (this.project.end).toLocaleDateString()
+  },
+   methods: {
+    loadStages () {
+      const url = 'stage/' + this.projectId
+      const params = {
+        Authorization: 'Bearer ' + localStorage.token
+      }
+        api({
+        method: "get",
+        url: url,
+        headers: params,
+      })
+        .then(response => {
+        this.rows = response.data;
+        this.$forceUpdate();
+      })
+        .catch(error => {
+        this.loading = false;
+        console.log(error.response)
+      });
+    },
+  }
+
 }
 </script>
 
