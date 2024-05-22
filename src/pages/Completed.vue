@@ -76,6 +76,8 @@
 </template>
 
 <script>
+import {api} from "boot/axios";
+
 const columns = [
   {
     name: 'name',
@@ -98,48 +100,7 @@ const columns = [
   format: val => `${val}`, label: 'Fim'},
 ]
 
-const rows = [
-  {
-    name: 'Frozen Yogurt',
-    head: 159,
-    start: 6.0,
-    end: 24,
-    value: 14,
-    company: 'ShineShine'
-  },
-  {
-    name: 'Ice cream sandwich',
-    head: 237,
-    value: 14,
-    start: 9.0,
-    company: 'ShineShine',
-    end: 37,
-  },
-  {
-    name: 'Eclair',
-    head: 262,
-    value: 14,
-    start: 16.0,
-    company: 'ShineShine',
-    end: 23,
-  },
-  {
-    name: 'Cupcake',
-    head: 305,
-    value: 14,
-    company: 'ShineShine',
-    start: 3.7,
-    end: 67,
-  },
-  {
-    name: 'Gingerbread',
-    value: 14,
-    head: 356,
-    company: 'ShineShine',
-    start: 16.0,
-    end: 49,
-  },
-]
+const rows = []
 export default {
   data () {
     return {
@@ -152,6 +113,31 @@ export default {
       }
 
     }
+  },
+  mounted () {
+    this.getProject()
+  },
+  methods:{
+    getProject () {
+      const url = 'project'
+      const params = {
+        Authorization: 'Bearer ' + localStorage.token
+      }
+      api({
+        method:"get",
+        url: url,
+        headers: params,
+      })
+        .then(response => {
+          this.rows = response.data.filter((element) => {
+            return element.status === 'complete' ? element : null
+          })
+          this.$forceUpdate()
+        })
+        .catch(error => {
+          console.log(error.response)
+        })
+    },
   }
 }
 </script>
